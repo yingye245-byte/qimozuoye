@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>数据看板 - 校园二手后台管理</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script th:src="@{/js/echarts.min.js}"></script>
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手 · 后台</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/admin}">数据看板</a>
+            <a th:href="@{/admin/audit}">商品审核</a>
+            <a th:href="@{/admin/users}">用户管理</a>
+            <a th:href="@{/admin/orders}">订单管理</a>
+            <a th:href="@{/}">返回前台</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container site-main">
+
+    <div class="card">
+        <h2 class="card-title">平台概览</h2>
+        <div class="stat-grid">
+            <div class="stat-box"><div class="stat-num" th:text="${stat['userTotal']}">0</div><div class="stat-label">注册用户</div></div>
+            <div class="stat-box"><div class="stat-num" th:text="${stat['itemTotal']}">0</div><div class="stat-label">闲置物品</div></div>
+            <div class="stat-box"><div class="stat-num" th:text="${stat['orderTotal']}">0</div><div class="stat-label">订单总数</div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">定时任务演示（Spring Task）</h2>
+        <p style="font-size:13px;margin:-6px 0 12px 0;">
+            以下任务平时由 cron 自动触发：超时扫描每 5 分钟、成交统计每天 01:00、缓存清理每天 03:00。
+            答辩演示时点下面的按钮可以立即执行一次，效果与定时触发完全一致。
+        </p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <form th:action="@{/admin/task/scan-timeout}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-primary btn-sm">立即扫描超时订单</button>
+            </form>
+            <form th:action="@{/admin/task/stat}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-plain btn-sm">立即归档成交统计</button>
+            </form>
+            <form th:action="@{/admin/task/clear-cache}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-plain btn-sm">清空看板缓存</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">最近 7 天成交趋势</h2>
+        <div id="dealChart" style="width:100%;height:320px;"></div>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">商品分类分布</h2>
+        <div id="categoryChart" style="width:100%;height:320px;"></div>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">订单状态分布</h2>
+        <div id="statusChart" style="width:100%;height:320px;"></div>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">卖家成交排行 TOP5</h2>
+        <div id="sellerChart" style="width:100%;height:320px;"></div>
+    </div>
+
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台 · 后台管理</div></footer>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var ctxPath = /*[[@{/}]]*/ '/';
+    /*]]>*/
+</script>
+<script>
+(function () {
+    if (typeof echarts === 'undefined') {
+        document.querySelectorAll('div[id$="Chart"]').forEach(function (el) {
+            el.innerHTML = '<p class="muted">图表库未加载</p>';
+        });
+        return;
+    }
+
+    function getJson(url) {
+        return fetch(url, { credentials: 'same-origin' }).then(function (r) { return r.json(); });
+    }
+
+    // 1. 成交趋势（折线图：成交单数 + 成交金额双轴）
+    getJson(ctxPath + 'admin/chart/deal?days=7').then(function (rows) {
+        rows = rows || [];
+        var labels = rows.map(function (r) { return r.day || r.DAY || ''; });
+        var counts = rows.map(function (r) { return Number(r.cnt || r.CNT || 0); });
+        var amounts = rows.map(function (r) { return Number(r.amt || r.AMT || 0); });
+        echarts.init(document.getElementById('dealChart')).setOption({
+            tooltip: { trigger: 'axis' },
+            legend: { data: ['成交单数', '成交金额'] },
+            grid: { left: 50, right: 60, top: 50, bottom: 40 },
+            xAxis: { type: 'category', boundaryGap: false, data: labels },
+            yAxis: [
+                { type: 'value', name: '单数', minInterval: 1 },
+                { type: 'value', name: '金额(元)', splitLine: { show: false } }
+            ],
+            series: [
+                { name: '成交单数', type: 'line', smooth: true, symbolSize: 8, itemStyle: { color: '#2f7d5d' }, areaStyle: { opacity: 0.12 }, data: counts },
+                { name: '成交金额', type: 'line', smooth: true, yAxisIndex: 1, symbolSize: 8, itemStyle: { color: '#e08e1a' }, data: amounts }
+            ]
+        });
+    });
+
+    // 2. 分类分布（圆环图）
+    getJson(ctxPath + 'admin/chart/category').then(function (rows) {
+        var data = (rows || []).map(function (r) {
+            return { name: r.name || r.NAME || '未分类', value: Number(r.value || r.cnt || r.CNT || 0) };
+        });
+        echarts.init(document.getElementById('categoryChart')).setOption({
+            tooltip: { trigger: 'item', formatter: '{b}: {c} 件 ({d}%)' },
+            legend: { bottom: 0 },
+            series: [{
+                type: 'pie', radius: ['40%', '65%'],
+                label: { formatter: '{b}: {c} 件' },
+                itemStyle: { borderColor: '#fff', borderWidth: 2 },
+                data: data
+            }]
+        });
+    });
+
+    // 3. 订单状态分布（漏斗图）
+    getJson(ctxPath + 'admin/chart/status').then(function (rows) {
+        var names = { 0: '待支付', 1: '已支付', 2: '已确认', 3: '已完成', 4: '已取消', 5: '已关闭' };
+        var data = (rows || []).map(function (r) {
+            var s = r.status !== undefined ? r.status : r.STATUS;
+            return { name: names[s] || ('状态' + s), value: Number(r.cnt || r.CNT || 0) };
+        });
+        echarts.init(document.getElementById('statusChart')).setOption({
+            tooltip: { trigger: 'item' },
+            legend: { bottom: 0 },
+            series: [{
+                type: 'funnel', sort: 'descending', minSize: '30%', gap: 2,
+                label: { position: 'inside', formatter: '{b}: {c}' },
+                data: data
+            }]
+        });
+    });
+
+    // 4. 卖家排行（条形图）
+    getJson(ctxPath + 'admin/chart/seller').then(function (rows) {
+        rows = (rows || []).slice().sort(function (a, b) {
+            return Number(a.dealCount || 0) - Number(b.dealCount || 0);
+        });
+        var names = rows.map(function (r) { return r.nickname || r.username || '卖家'; });
+        var values = rows.map(function (r) { return Number(r.dealCount || 0); });
+        echarts.init(document.getElementById('sellerChart')).setOption({
+            tooltip: { trigger: 'axis' },
+            grid: { left: 70, right: 40, top: 30, bottom: 40 },
+            xAxis: { type: 'value', minInterval: 1, name: '成交单数' },
+            yAxis: { type: 'category', data: names },
+            series: [{ name: '成交单数', type: 'bar', barWidth: '45%', itemStyle: { color: '#2f7d5d' }, label: { show: true, position: 'right' }, data: values }]
+        });
+    });
+})();
+</script>
+</body>
+</html>

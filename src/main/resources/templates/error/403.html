@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>无权访问 - 校园二手</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/item/list}">逛闲置</a>
+            <a th:href="@{/}">首页</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container site-main" style="max-width: 640px;">
+    <div class="card" style="text-align:center;">
+        <h1>403</h1>
+        <p>当前账号没有访问该页面的权限。</p>
+        <p class="muted">卖家中心需要"认证卖家"角色，后台管理需要"超级管理员"角色。</p>
+        <p>
+            <a class="btn btn-primary" th:href="@{/}">返回首页</a>
+            <a class="btn btn-plain" th:href="@{/seller}">卖家中心</a>
+        </p>
+    </div>
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台</div></footer>
+</body>
+</html>

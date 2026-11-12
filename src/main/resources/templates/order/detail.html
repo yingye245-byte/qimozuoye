@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>订单详情 - 校园二手闲置交易平台</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/item/list}">逛闲置</a>
+            <a th:href="@{/order/buyer}">我买到的</a>
+            <a th:href="@{/order/seller}">我卖出的</a>
+            <a th:href="@{/profile}">个人中心</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <div class="flash flash-success" th:if="${success}" th:text="${success}"></div>
+    <div class="flash flash-error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<main class="container site-main" style="max-width: 860px;">
+
+    <div class="card">
+        <h2 class="card-title">
+            订单 <span th:text="${order.orderNo}">SO20240101</span>
+            <span class="tag" th:text="${order.statusName}">待支付</span>
+        </h2>
+
+        <!-- 待支付倒计时 -->
+        <div class="flash flash-error" th:if="${order.status == 0}">
+            请在 <span class="countdown" th:attr="data-remain=${remainSeconds}">30 分 00 秒</span> 内完成支付，超时系统将自动取消订单并释放物品（RabbitMQ 延迟队列 + 定时任务双保险）
+        </div>
+
+        <ul class="info-list">
+            <li>物品：<a th:href="@{/item/detail/{id}(id=${order.itemId})}" th:text="${order.itemTitle}">物品</a></li>
+            <li>金额：<span class="price" th:text="'¥' + ${order.amount}">¥0</span></li>
+            <li>买家：<span th:text="${order.buyerName}">买家</span></li>
+            <li>卖家：<span th:text="${order.sellerName}">卖家</span></li>
+            <li>下单时间：<span th:text="${#temporals.format(order.createTime, 'yyyy-MM-dd HH:mm:ss')}">-</span></li>
+            <li th:if="${order.payTime != null}">支付时间：<span th:text="${#temporals.format(order.payTime, 'yyyy-MM-dd HH:mm:ss')}">-</span></li>
+            <li th:if="${order.finishTime != null}">完成时间：<span th:text="${#temporals.format(order.finishTime, 'yyyy-MM-dd HH:mm:ss')}">-</span></li>
+            <li th:if="${order.cancelReason != null}">取消原因：<span th:text="${order.cancelReason}">-</span></li>
+        </ul>
+
+        <div class="detail-actions">
+            <form th:if="${order.status == 0 and loginUser != null and loginUser.id == order.buyerId}"
+                  th:action="@{/order/{id}/pay(id=${order.id})}" method="post" class="inline-form">
+                <button class="btn btn-primary" type="submit">模拟支付</button>
+            </form>
+
+            <form th:if="${order.status == 0 and loginUser != null and (loginUser.id == order.buyerId or loginUser.id == order.sellerId)}"
+                  th:action="@{/order/{id}/cancel(id=${order.id})}" method="post" class="inline-form">
+                <button class="btn btn-plain" type="submit">取消订单</button>
+            </form>
+
+            <form th:if="${order.status == 1 and loginUser != null and loginUser.id == order.sellerId}"
+                  th:action="@{/order/{id}/confirm(id=${order.id})}" method="post" class="inline-form">
+                <button class="btn btn-primary" type="submit">卖家确认交易</button>
+            </form>
+
+            <form th:if="${order.status == 2 and loginUser != null and loginUser.id == order.buyerId}"
+                  th:action="@{/order/{id}/finish(id=${order.id})}" method="post" class="inline-form">
+                <button class="btn btn-primary" type="submit">确认收货</button>
+            </form>
+
+            <a class="btn btn-plain" th:href="@{/order/buyer}">返回订单列表</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title">交易流程</h3>
+        <p class="muted">
+            下单 → 支付（30 分钟内，超时 MQ 自动取消并恢复物品可售）→ 卖家确认 → 买家收货完成 →
+            RabbitMQ 异步推送状态通知，Spring Task 每日 01:00 汇总交易统计。
+        </p>
+    </div>
+
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台</div></footer>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>我的订单 - 校园二手闲置交易平台</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/item/list}">逛闲置</a>
+            <a th:href="@{/profile}">个人中心</a>
+            <a th:href="@{/seller}" th:if="${loginUser != null and loginUser.role >= 2}">卖家中心</a>
+            <a th:href="@{/admin}" th:if="${loginUser != null and loginUser.role == 3}">后台管理</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <div class="flash flash-success" th:if="${success}" th:text="${success}"></div>
+    <div class="flash flash-error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<main class="container site-main">
+
+    <div class="card">
+        <div class="section-title" style="margin-top: 0;">
+            <h2>
+                <a th:href="@{/order/buyer}" th:classappend="${tab == 'buyer'} ? 'active-tab' : ''">我买到的</a>
+                &nbsp;|&nbsp;
+                <a th:href="@{/order/seller}" th:classappend="${tab == 'seller'} ? 'active-tab' : ''">我卖出的</a>
+            </h2>
+        </div>
+
+        <div class="filter-bar">
+            <a class="btn btn-plain btn-sm" th:href="@{/order/buyer}">全部</a>
+            <a class="btn btn-plain btn-sm" th:href="@{/order/buyer(status=0)}">待支付</a>
+            <a class="btn btn-plain btn-sm" th:href="@{/order/buyer(status=1)}">已支付</a>
+            <a class="btn btn-plain btn-sm" th:href="@{/order/buyer(status=2)}">待收货</a>
+            <a class="btn btn-plain btn-sm" th:href="@{/order/buyer(status=3)}">已完成</a>
+            <a class="btn btn-plain btn-sm" th:href="@{/order/buyer(status=4)}">已取消</a>
+        </div>
+
+        <table class="data" th:if="${page.records != null and !#lists.isEmpty(page.records)}">
+            <thead>
+            <tr>
+                <th>订单号</th>
+                <th>物品</th>
+                <th>金额</th>
+                <th th:text="${tab == 'seller'} ? '买家' : '卖家'">对方</th>
+                <th>状态</th>
+                <th>下单时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="o : ${page.records}">
+                <td th:text="${o.orderNo}">SOxxx</td>
+                <td>
+                    <a th:href="@{/item/detail/{id}(id=${o.itemId})}" th:text="${o.itemTitle}">物品</a>
+                </td>
+                <td class="price" th:text="'¥' + ${o.amount}">¥0</td>
+                <td th:text="${tab == 'seller'} ? ${o.buyerName} : ${o.sellerName}">对方</td>
+                <td>
+                    <span class="tag" th:if="${o.status == 0 or o.status == 1}" th:text="${o.statusName}"></span>
+                    <span class="tag tag-gray" th:if="${o.status == 2}">待收货</span>
+                    <span class="tag tag-gray" th:if="${o.status == 3}">已完成</span>
+                    <span class="tag tag-red" th:if="${o.status == 4 or o.status == 5}" th:text="${o.statusName}"></span>
+                </td>
+                <td th:text="${#temporals.format(o.createTime, 'yyyy-MM-dd HH:mm')}">时间</td>
+                <td>
+                    <a class="btn btn-plain btn-sm" th:href="@{/order/detail/{id}(id=${o.id})}">详情</a>
+                    <form th:if="${o.status == 0 and tab == 'buyer'}" th:action="@{/order/{id}/pay(id=${o.id})}" method="post" class="inline-form">
+                        <button class="btn btn-primary btn-sm" type="submit">去支付</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="empty" th:if="${page.records == null or #lists.isEmpty(page.records)}">暂无订单</div>
+
+        <div class="pager" th:if="${page.pages > 1}">
+            <a th:if="${page.current > 1}" th:href="@{(tab == 'seller' ? '/order/seller' : '/order/buyer')(page=${page.current - 1}, status=${status})}">上一页</a>
+            <span th:text="${page.current} + ' / ' + ${page.pages}"></span>
+            <a th:if="${page.current < page.pages}" th:href="@{(tab == 'seller' ? '/order/seller' : '/order/buyer')(page=${page.current + 1}, status=${status})}">下一页</a>
+        </div>
+    </div>
+
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台</div></footer>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

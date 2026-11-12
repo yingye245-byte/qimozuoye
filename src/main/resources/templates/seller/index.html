@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>卖家中心 - 校园二手闲置交易平台</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/item/list}">逛闲置</a>
+            <a th:href="@{/seller}">卖家中心</a>
+            <a th:href="@{/seller/items}">我的商品</a>
+            <a th:href="@{/seller/comments}">留言管理</a>
+            <a th:href="@{/order/seller}">我卖出的</a>
+            <a th:href="@{/admin}" th:if="${loginUser.role == 3}">后台管理</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <div class="flash flash-success" th:if="${success}" th:text="${success}"></div>
+    <div class="flash flash-error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<main class="container site-main">
+
+    <div class="card">
+        <h2 class="card-title">经营概览</h2>
+        <div class="stat-grid">
+            <div class="stat-box"><div class="stat-num" th:text="${stat['itemTotal']}">0</div><div class="stat-label">发布商品</div></div>
+            <div class="stat-box"><div class="stat-num" th:text="${stat['orderTotal']}">0</div><div class="stat-label">收到订单</div></div>
+            <div class="stat-box"><div class="stat-num" th:text="${stat['finishTotal']}">0</div><div class="stat-label">完成交易</div></div>
+            <div class="stat-box"><div class="stat-num" th:text="'¥' + ${stat['totalAmount']}">¥0</div><div class="stat-label">累计收入</div></div>
+            <div class="stat-box"><div class="stat-num" th:text="${stat['commentTotal']}">0</div><div class="stat-label">收到留言</div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">最近发布</h2>
+        <table class="data" th:if="${myItems != null and !#lists.isEmpty(myItems)}">
+            <thead>
+            <tr><th>商品</th><th>价格</th><th>审核</th><th>状态</th><th>发布时间</th><th>操作</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="it, itStat : ${myItems}" th:if="${itStat.index < 5}">
+                <td th:text="${it.title}">商品</td>
+                <td class="price" th:text="'¥' + ${it.price}">¥0</td>
+                <td>
+                    <span class="tag tag-gray" th:if="${it.auditStatus == 0}">待审核</span>
+                    <span class="tag" th:if="${it.auditStatus == 1}">已通过</span>
+                    <span class="tag tag-red" th:if="${it.auditStatus == 2}">已驳回</span>
+                </td>
+                <td th:text="${it.statusName}">在售</td>
+                <td th:text="${it.createTime != null} ? ${#temporals.format(it.createTime, 'yyyy-MM-dd HH:mm')} : '-'">-</td>
+                <td><a class="btn btn-plain btn-sm" th:href="@{/item/detail/{id}(id=${it.id})}">查看</a></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="empty" th:if="${myItems == null or #lists.isEmpty(myItems)}">还没有发布商品</div>
+        <p><a class="btn btn-primary" th:href="@{/item/publish}">发布闲置</a></p>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">卖家认证</h2>
+        <p class="muted" th:if="${loginUser.role == 1}">你当前是普通用户，认证后可以发布闲置物品（认证通过需重新登录）。</p>
+        <p class="muted" th:if="${loginUser.role >= 2}">你已是认证卖家。</p>
+        <form th:if="${loginUser.role == 1}" th:action="@{/seller/apply}" method="post">
+            <button class="btn btn-primary" type="submit">申请成为卖家</button>
+        </form>
+    </div>
+
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台</div></footer>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

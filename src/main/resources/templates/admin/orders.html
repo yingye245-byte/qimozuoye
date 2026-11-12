@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>订单管理 - 校园二手后台管理</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手 · 后台</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/admin}">数据看板</a>
+            <a th:href="@{/admin/audit}">商品审核</a>
+            <a th:href="@{/admin/users}">用户管理</a>
+            <a th:href="@{/admin/orders}">订单管理</a>
+            <a th:href="@{/}">返回前台</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container site-main">
+    <div class="card">
+        <h2 class="card-title">全部订单</h2>
+
+        <div class="filter-bar">
+            <a class="btn btn-plain btn-sm" th:href="@{/admin/orders}">全部</a>
+            <a class="btn btn-plain btn-sm" th:href="@{/admin/orders(status=0)}">待支付</a>
+            <a class="btn btn-plain btn-sm" th:href="@{/admin/orders(status=1)}">已支付</a>
+            <a class="btn btn-plain btn-sm" th:href="@{/admin/orders(status=2)}">已确认</a>
+            <a class="btn btn-plain btn-sm" th:href="@{/admin/orders(status=3)}">已完成</a>
+            <a class="btn btn-plain btn-sm" th:href="@{/admin/orders(status=4)}">已取消</a>
+        </div>
+
+        <table class="data" th:if="${page.records != null and !#lists.isEmpty(page.records)}">
+            <thead>
+            <tr>
+                <th>订单号</th>
+                <th>物品</th>
+                <th>买家</th>
+                <th>卖家</th>
+                <th>金额</th>
+                <th>状态</th>
+                <th>下单时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="o : ${page.records}">
+                <td th:text="${o.orderNo}">SO</td>
+                <td th:text="${o.itemTitle}">物品</td>
+                <td th:text="${o.buyerName}">买家</td>
+                <td th:text="${o.sellerName}">卖家</td>
+                <td class="price" th:text="'¥' + ${o.amount}">¥0</td>
+                <td th:text="${o.statusName}">状态</td>
+                <td th:text="${o.createTime != null} ? ${#temporals.format(o.createTime, 'yyyy-MM-dd HH:mm')} : '-'">-</td>
+                <td>
+                    <a class="btn btn-plain btn-sm" th:href="@{/order/detail/{id}(id=${o.id})}">详情</a>
+                    <form method="post" style="display:inline" th:if="${o.status == 0 or o.status == 1 or o.status == 2}"
+                          th:action="@{/admin/orders/{id}/cancel(id=${o.id})}">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+                        <input type="hidden" name="reason" value="违规商品处理">
+                        <button class="btn btn-danger btn-sm" type="submit">强制取消</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="empty" th:if="${page.records == null or #lists.isEmpty(page.records)}">暂无订单</div>
+
+        <div class="pager" th:if="${page.pages > 1}">
+            <a th:if="${page.current > 1}" th:href="@{/admin/orders(page=${page.current - 1}, status=${status})}">上一页</a>
+            <span th:text="${page.current} + ' / ' + ${page.pages}"></span>
+            <a th:if="${page.current < page.pages}" th:href="@{/admin/orders(page=${page.current + 1}, status=${status})}">下一页</a>
+        </div>
+    </div>
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台 · 后台管理</div></footer>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

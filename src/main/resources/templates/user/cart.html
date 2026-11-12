@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>想要清单 - 校园二手闲置交易平台</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/item/list}">逛闲置</a>
+            <a th:href="@{/profile}">个人中心</a>
+            <a th:href="@{/seller}" th:if="${loginUser.role >= 2}">卖家中心</a>
+            <a th:href="@{/admin}" th:if="${loginUser.role == 3}">后台管理</a>
+            <form th:action="@{/logout}" method="post" class="inline-form">
+                <button class="btn btn-plain btn-sm" type="submit">退出</button>
+            </form>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <div class="flash flash-success" th:if="${success}" th:text="${success}"></div>
+    <div class="flash flash-error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<main class="container site-main">
+    <div class="card">
+        <h2 class="card-title">我的想要清单</h2>
+
+        <table class="data" th:if="${carts != null and !#lists.isEmpty(carts)}">
+            <thead>
+            <tr>
+                <th>物品</th>
+                <th>价格</th>
+                <th>加入时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${carts}">
+                <td>
+                    <a th:href="@{/item/detail/{id}(id=${c.itemId})}" th:text="${c.itemTitle}">物品</a>
+                </td>
+                <td class="price" th:text="'¥' + ${c.itemPrice}">¥0</td>
+                <td th:text="${c.createTime != null} ? ${#temporals.format(c.createTime, 'yyyy-MM-dd HH:mm')} : '-'">-</td>
+                <td>
+                    <form th:action="@{/profile/cart/{id}/remove(id=${c.id})}" method="post" class="inline-form">
+                        <button class="btn btn-danger btn-sm" type="submit">移出</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="empty" th:if="${carts == null or #lists.isEmpty(carts)}">清单是空的，去<a th:href="@{/item/list}">逛逛闲置</a>吧</div>
+    </div>
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台</div></footer>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

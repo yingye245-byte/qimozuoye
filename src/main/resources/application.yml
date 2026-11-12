@@ -1,0 +1,49 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  profiles:
+    active: dev
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+  # 上传文件落在 D 盘（/uploads/** 的映射见 WebMvcConfig）
+  web:
+    resources:
+      static-locations: classpath:/static/,file:${campus.upload.path:D:/projects/uploads}/
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+logging:
+  file:
+    name: D:/projects/logs/campus-secondhand.log
+  logback:
+    rollingpolicy:
+      max-file-size: 20MB
+      max-history: 30
+  level:
+    com.campus.shop: debug
+
+# 业务自定义配置
+campus:
+  upload:
+    path: D:/projects/uploads
+  order:
+    timeout-minutes: 30
+    fault-tolerance-seconds: 60

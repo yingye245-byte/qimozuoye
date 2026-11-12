@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title != null} ? ${title} + ' - 校园二手' : '出错了 - 校园二手'">出错了</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/item/list}">逛闲置</a>
+            <a th:href="@{/}">首页</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container site-main" style="max-width: 640px;">
+    <div class="card" style="text-align:center;">
+        <h1 th:text="${status != null} ? ${status} : '出错了'">出错了</h1>
+        <p th:text="${message != null} ? ${message} : '页面找不到或服务开小差了，请稍后再试。'">提示</p>
+        <p>
+            <a class="btn btn-primary" th:href="@{/}">返回首页</a>
+            <a class="btn btn-plain" th:href="@{/item/list}">逛闲置</a>
+        </p>
+    </div>
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台</div></footer>
+</body>
+</html>

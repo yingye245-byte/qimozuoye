@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>个人中心 - 校园二手闲置交易平台</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/item/list}">逛闲置</a>
+            <a th:href="@{/profile}">个人中心</a>
+            <a th:href="@{/seller}" th:if="${loginUser.role >= 2}">卖家中心</a>
+            <a th:href="@{/admin}" th:if="${loginUser.role == 3}">后台管理</a>
+            <form th:action="@{/logout}" method="post" class="inline-form">
+                <button class="btn btn-plain btn-sm" type="submit">退出</button>
+            </form>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <div class="flash flash-success" th:if="${success}" th:text="${success}"></div>
+    <div class="flash flash-error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<main class="container site-main">
+
+    <div class="card">
+        <h2 class="card-title">我的资料</h2>
+        <form th:action="@{/profile/update}" method="post">
+            <div class="form-row">
+                <label>用户名</label>
+                <input type="text" th:value="${me.username}" disabled>
+            </div>
+            <div class="form-row">
+                <label for="nickname">昵称</label>
+                <input id="nickname" type="text" name="nickname" th:value="${me.nickname}" required maxlength="30">
+            </div>
+            <div class="form-row">
+                <label for="email">邮箱</label>
+                <input id="email" type="email" name="email" th:value="${me.email}" required>
+            </div>
+            <div class="form-row">
+                <label>角色</label>
+                <input type="text" th:value="${me.roleName}" disabled>
+            </div>
+            <button class="btn btn-primary" type="submit">保存资料</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">修改密码</h2>
+        <form th:action="@{/profile/password}" method="post">
+            <div class="form-row">
+                <label for="oldPassword">原密码</label>
+                <input id="oldPassword" type="password" name="oldPassword" required>
+            </div>
+            <div class="form-row">
+                <label for="newPassword">新密码</label>
+                <input id="newPassword" type="password" name="newPassword" required minlength="6">
+            </div>
+            <div class="form-row">
+                <label for="confirmPassword">确认新密码</label>
+                <input id="confirmPassword" type="password" name="confirmPassword" required minlength="6">
+            </div>
+            <button class="btn btn-primary" type="submit">修改密码</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">快捷入口</h2>
+        <div class="detail-actions">
+            <a class="btn btn-plain" th:href="@{/order/buyer}">我买到的</a>
+            <a class="btn btn-plain" th:href="@{/order/seller}">我卖出的</a>
+            <a class="btn btn-plain" th:href="@{/profile/cart}">想要清单</a>
+            <a class="btn btn-plain" th:href="@{/item/publish}">发布闲置</a>
+            <a class="btn btn-plain" th:href="@{/seller}" th:if="${loginUser.role >= 2}">卖家中心</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">最近浏览</h2>
+        <div class="item-grid">
+            <a class="item-card" th:each="b : ${browseList}" th:href="@{/item/detail/{id}(id=${b.itemId})}">
+                <div class="item-cover-wrap">
+                    <img class="item-cover" th:src="${b.itemCover != null} ? ${b.itemCover} : @{/images/placeholder.png}" alt="浏览记录">
+                </div>
+                <div class="item-body">
+                    <div class="item-title" th:text="${b.itemTitle}">物品</div>
+                    <div class="item-meta"><span class="price" th:text="'¥' + ${b.itemPrice}">¥0</span></div>
+                </div>
+            </a>
+        </div>
+        <div class="empty" th:if="${browseList == null or #lists.isEmpty(browseList)}">还没有浏览记录</div>
+    </div>
+
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台</div></footer>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

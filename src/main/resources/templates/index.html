@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>校园二手闲置交易平台</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手</span></a>
+        <form class="search-box" th:action="@{/item/search}" method="get">
+            <input type="text" name="keyword" placeholder="搜索你想要的闲置物品，如：自行车、高数教材">
+            <button type="submit">搜索</button>
+        </form>
+        <nav class="site-nav">
+            <a th:href="@{/item/list}">逛闲置</a>
+            <a th:if="${loginUser == null}" class="nav-btn" th:href="@{/login}">登录</a>
+            <a th:if="${loginUser == null}" class="nav-btn nav-btn-primary" th:href="@{/register}">注册</a>
+            <a th:if="${loginUser != null}" th:href="@{/profile}">个人中心</a>
+            <a th:if="${loginUser != null}" th:href="@{/order/buyer}">我的订单</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <div class="flash flash-success" th:if="${pendingMsg != null}" th:text="${pendingMsg}"></div>
+    <div class="flash flash-success" th:if="${success != null}" th:text="${success}"></div>
+    <div class="flash flash-error" th:if="${error != null}" th:text="${error}"></div>
+</div>
+
+<div class="container">
+    <div class="flash flash-success" th:if="${success}" th:text="${success}"></div>
+    <div class="flash flash-error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<main class="container site-main">
+
+    <div class="card">
+        <h1>把闲置物品，交给同校的同学</h1>
+        <p class="muted">今天发布 5 件物品，让宿舍里的旧书旧物重新流动起来。本平台提供商品发布、在线交易、超时自动取消与后台数据看板。</p>
+        <div class="detail-actions">
+            <a class="btn btn-primary" th:href="@{/item/publish}">发布闲置</a>
+            <a class="btn btn-plain" th:href="@{/item/list}">浏览全部物品</a>
+        </div>
+    </div>
+
+    <div class="section-title"><h2>分类逛一逛</h2></div>
+    <div class="cat-grid">
+        <a class="cat-card" th:each="c : ${categories}"
+           th:if="${c.parentId != null and c.parentId == 0}"
+           th:href="@{/item/list(categoryId=${c.id})}">
+            <span class="cat-icon" th:text="${#strings.substring(c.name,0,1)}">分</span>
+            <span class="cat-name" th:text="${c.name}">分类</span>
+        </a>
+    </div>
+
+    <div class="section-title">
+        <h2>热门闲置</h2>
+        <a th:href="@{/item/list(sort='hot')}">更多 &gt;</a>
+    </div>
+    <div class="item-grid">
+        <a class="item-card" th:each="it : ${hotItems}" th:href="@{/item/detail/{id}(id=${it.id})}">
+            <div class="item-cover-wrap">
+                <img class="item-cover" th:src="${it.cover != null} ? ${it.cover} : @{/images/placeholder.png}" alt="商品图">
+            </div>
+            <div class="item-body">
+                <div class="item-title" th:text="${it.title}">商品</div>
+                <div class="item-meta">
+                    <span class="price" th:text="'¥' + ${it.price}">¥0</span>
+                    <span class="tag" th:text="${it.categoryName}">分类</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="empty" th:if="${#lists.isEmpty(hotItems)}">暂时还没有热门商品，快去发布第一件吧</div>
+
+    <div class="section-title">
+        <h2>最新上架</h2>
+        <a th:href="@{/item/list}">更多 &gt;</a>
+    </div>
+    <div class="item-grid">
+        <a class="item-card" th:each="it : ${newItems}" th:href="@{/item/detail/{id}(id=${it.id})}">
+            <div class="item-cover-wrap">
+                <img class="item-cover" th:src="${it.cover != null} ? ${it.cover} : @{/images/placeholder.png}" alt="商品图">
+            </div>
+            <div class="item-body">
+                <div class="item-title" th:text="${it.title}">商品</div>
+                <div class="item-meta">
+                    <span class="price" th:text="'¥' + ${it.price}">¥0</span>
+                    <span class="muted" th:text="${it.sellerName}">卖家</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="empty" th:if="${#lists.isEmpty(newItems)}">暂时还没有商品上架</div>
+
+</main>
+
+<footer class="site-footer">
+    <div class="container">
+        <p>校园二手闲置交易平台 · Spring Boot 企业级项目开发期末综合大作业</p>
+        <p class="muted">技术栈：Spring Boot 2.7+ / Thymeleaf / MyBatis-Plus / MySQL 8.0 / Redis / RabbitMQ / Spring Security</p>
+    </div>
+</footer>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

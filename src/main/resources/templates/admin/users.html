@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理 - 校园二手后台管理</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手 · 后台</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/admin}">数据看板</a>
+            <a th:href="@{/admin/audit}">商品审核</a>
+            <a th:href="@{/admin/users}">用户管理</a>
+            <a th:href="@{/admin/orders}">订单管理</a>
+            <a th:href="@{/}">返回前台</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <div class="flash flash-success" th:if="${success}" th:text="${success}"></div>
+    <div class="flash flash-error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<main class="container site-main">
+    <div class="card">
+        <h2 class="card-title">用户列表（<span th:text="${#lists.size(users)}">0</span>）</h2>
+
+        <table class="data">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>用户名</th>
+                <th>昵称</th>
+                <th>邮箱</th>
+                <th>角色</th>
+                <th>状态</th>
+                <th>注册时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="u : ${users}">
+                <td th:text="${u.id}">1</td>
+                <td th:text="${u.username}">user</td>
+                <td th:text="${u.nickname}">昵称</td>
+                <td th:text="${u.email}">邮箱</td>
+                <td>
+                    <span class="tag tag-red" th:if="${u.role == 3}">超级管理员</span>
+                    <span class="tag" th:if="${u.role == 2}">认证卖家</span>
+                    <span class="tag tag-gray" th:if="${u.role == 1}">普通用户</span>
+                </td>
+                <td>
+                    <span class="tag" th:if="${u.status == 1}">正常</span>
+                    <span class="tag tag-red" th:if="${u.status == 0}">已禁用</span>
+                </td>
+                <td th:text="${u.createTime != null} ? ${#temporals.format(u.createTime, 'yyyy-MM-dd HH:mm')} : '-'">-</td>
+                <td>
+                    <form th:action="@{/admin/users/{id}/toggle(id=${u.id})}" method="post" class="inline-form">
+                        <button class="btn btn-plain btn-sm" th:text="${u.status == 1} ? '禁用' : '启用'">禁用</button>
+                    </form>
+                    <form th:if="${u.role == 1}" th:action="@{/admin/users/{id}/promote(id=${u.id})}" method="post" class="inline-form">
+                        <button class="btn btn-primary btn-sm" type="submit">升级为卖家</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台 · 后台管理</div></footer>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

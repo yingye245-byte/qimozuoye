@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>留言管理 - 校园二手闲置交易平台</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/item/list}">逛闲置</a>
+            <a th:href="@{/seller}">卖家中心</a>
+            <a th:href="@{/seller/items}">我的商品</a>
+            <a th:href="@{/seller/comments}">留言管理</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <div class="flash flash-success" th:if="${success}" th:text="${success}"></div>
+    <div class="flash flash-error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<main class="container site-main">
+    <div class="card">
+        <h2 class="card-title">我收到的留言</h2>
+
+        <div class="comment" th:each="c : ${comments}">
+            <div class="comment-head">
+                <span th:text="${c.fromUserName}">买家</span>
+                <span th:text="${c.createTime != null} ? ${#temporals.format(c.createTime, 'yyyy-MM-dd HH:mm')} : ''">时间</span>
+            </div>
+            <p>
+                <a th:href="@{/item/detail/{id}(id=${c.itemId})}" th:text="${c.itemTitle}">相关商品</a>：
+                <span th:text="${c.content}">留言</span>
+            </p>
+            <div class="comment-reply" th:if="${c.replyContent != null and c.replyContent != ''}">
+                <strong>我的回复：</strong><span th:text="${c.replyContent}"></span>
+            </div>
+            <form th:if="${c.replyContent == null or c.replyContent == ''}"
+                  th:action="@{/seller/comments/{id}/reply(id=${c.id})}" method="post" style="margin-top:8px;">
+                <div class="form-row">
+                    <input type="text" name="reply" placeholder="回复买家..." required maxlength="300">
+                </div>
+                <button class="btn btn-primary btn-sm" type="submit">回复</button>
+            </form>
+        </div>
+
+        <div class="empty" th:if="${comments == null or #lists.isEmpty(comments)}">还没有收到留言</div>
+    </div>
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台</div></footer>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>注册 - 校园二手闲置交易平台</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/}">返回首页</a>
+            <a class="nav-btn" th:href="@{/login}">已有账号，去登录</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container site-main" style="max-width: 460px;">
+    <div class="card">
+        <h2 class="card-title">注册新账号</h2>
+
+        <div class="flash flash-error" th:if="${error}" th:text="${error}"></div>
+
+        <form th:action="@{/register}" method="post">
+            <div class="form-row">
+                <label for="username">用户名</label>
+                <input id="username" type="text" name="username" placeholder="4-20 位字母数字下划线"
+                       th:value="${dto != null} ? ${dto.username} : ''" required>
+                <small>登录用，注册后不可修改</small>
+            </div>
+            <div class="form-row">
+                <label for="nickname">昵称</label>
+                <input id="nickname" type="text" name="nickname" placeholder="同学你好"
+                       th:value="${dto != null} ? ${dto.nickname} : ''">
+            </div>
+            <div class="form-row">
+                <label for="email">邮箱</label>
+                <input id="email" type="email" name="email" placeholder="用于接收订单通知"
+                       th:value="${dto != null} ? ${dto.email} : ''">
+            </div>
+            <div class="form-row">
+                <label for="password">密码</label>
+                <input id="password" type="password" name="password" placeholder="至少 6 位" required>
+            </div>
+            <div class="form-row">
+                <label for="confirmPassword">确认密码</label>
+                <input id="confirmPassword" type="password" name="confirmPassword" placeholder="再输入一次" required>
+            </div>
+            <button class="btn btn-primary" type="submit" style="width: 100%;">注册</button>
+        </form>
+    </div>
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台</div></footer>
+</body>
+</html>

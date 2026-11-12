@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>商品审核 - 校园二手后台管理</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手 · 后台</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/admin}">数据看板</a>
+            <a th:href="@{/admin/audit}">商品审核</a>
+            <a th:href="@{/admin/users}">用户管理</a>
+            <a th:href="@{/admin/orders}">订单管理</a>
+            <a th:href="@{/}">返回前台</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <div class="flash flash-success" th:if="${success}" th:text="${success}"></div>
+    <div class="flash flash-error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<main class="container site-main">
+    <div class="card">
+        <h2 class="card-title">待审核商品（<span th:text="${count}">0</span>）</h2>
+
+        <table class="data" th:if="${pending != null and !#lists.isEmpty(pending)}">
+            <thead>
+            <tr>
+                <th>图片</th>
+                <th>标题</th>
+                <th>分类</th>
+                <th>卖家</th>
+                <th>价格</th>
+                <th>描述</th>
+                <th>提交时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="it : ${pending}">
+                <td><img th:src="${it.cover != null} ? ${it.cover} : @{/images/placeholder.png}"
+                         alt="封面" style="width:64px;height:64px;object-fit:cover;border-radius:6px;"></td>
+                <td><a th:href="@{/item/detail/{id}(id=${it.id})}" th:text="${it.title}">标题</a></td>
+                <td th:text="${it.categoryName}">分类</td>
+                <td th:text="${it.sellerName}">卖家</td>
+                <td class="price" th:text="'¥' + ${it.price}">¥0</td>
+                <td th:text="${it.description}" style="max-width:280px;">描述</td>
+                <td th:text="${it.createTime != null} ? ${#temporals.format(it.createTime, 'MM-dd HH:mm')} : '-'">-</td>
+                <td>
+                    <form th:action="@{/admin/audit/{id}(id=${it.id})}" method="post" class="inline-form">
+                        <input type="hidden" name="pass" value="true">
+                        <button class="btn btn-primary btn-sm" type="submit">通过</button>
+                    </form>
+                    <form th:action="@{/admin/audit/{id}(id=${it.id})}" method="post" class="inline-form">
+                        <input type="hidden" name="pass" value="false">
+                        <button class="btn btn-danger btn-sm" type="submit">驳回</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="empty" th:if="${pending == null or #lists.isEmpty(pending)}">没有待审核商品</div>
+    </div>
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台 · 后台管理</div></footer>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

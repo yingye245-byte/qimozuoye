@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>发布闲置 - 校园二手闲置交易平台</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="site-body">
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}"><span class="brand-logo">二</span><span class="brand-text">校园二手</span></a>
+        <nav class="site-nav">
+            <a th:href="@{/item/list}">逛闲置</a>
+            <a th:href="@{/profile}">个人中心</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <div class="flash flash-success" th:if="${success}" th:text="${success}"></div>
+    <div class="flash flash-error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<main class="container site-main" style="max-width: 720px;">
+
+    <div class="card">
+        <h2 class="card-title">发布闲置物品</h2>
+
+        <form id="publishForm" th:action="@{/item/publish}" method="post">
+            <div class="form-row">
+                <label for="title">商品标题</label>
+                <input id="title" type="text" name="title" placeholder="例如：九成新自行车，骑了一学期" required maxlength="60">
+            </div>
+
+            <div class="form-row">
+                <label for="categoryId">分类</label>
+                <select id="categoryId" name="categoryId" required>
+                    <option value="">请选择分类</option>
+                    <optgroup th:each="top : ${categoryTree}" th:label="${top.name}">
+                        <!-- 大类本身可作为选项 -->
+                        <option th:value="${top.id}" th:text="${top.name + '（其他）'}"
+                                th:if="${#lists.isEmpty(top.children)}"></option>
+                        <!-- 大类下的小类 -->
+                        <option th:each="c : ${top.children}" th:value="${c.id}" th:text="${c.name}"></option>
+                    </optgroup>
+                    <!-- 没有下级分类的顶级分类不会进 optgroup，这里单独兜底 -->
+                    <option th:each="top : ${categoryTree}" th:value="${top.id}"
+                            th:text="${top.name + '（其他）'}"
+                            th:if="${#lists.isEmpty(top.children)}"></option>
+                </select>
+                <small>按「电子产品 / 学习教材 / 生活用品 …」大类归组，选最贴近的细类即可</small>
+            </div>
+
+            <div class="form-row">
+                <label for="price">价格（元）</label>
+                <input id="price" type="number" name="price" step="0.01" min="0.01" placeholder="0.00" required>
+            </div>
+
+            <div class="form-row">
+                <label for="description">详细描述</label>
+                <textarea id="description" name="description" placeholder="成色、入手时间、交易地点、是否有瑕疵..." required></textarea>
+            </div>
+
+            <div class="form-row">
+                <label>商品图片（最多 3 张，每张不超过 5MB）</label>
+                <div th:each="i : ${#numbers.sequence(1, 3)}" style="margin-bottom: 10px;">
+                    <input type="file" th:id="'imgInput' + ${i}" accept="image/*">
+                    <input type="hidden" th:id="'imgUrl' + ${i}">
+                    <img th:id="'imgPreview' + ${i}" alt="预览" style="display:none; width: 120px; margin-top: 6px; border-radius: 4px;">
+                </div>
+                <small>图片保存在服务器 D:/projects/uploads 目录下</small>
+            </div>
+
+            <input type="hidden" id="coverField" name="cover">
+            <input type="hidden" id="imagesField" name="images">
+            <div class="detail-actions">
+                <button class="btn btn-primary" type="submit">提交审核</button>
+                <a class="btn btn-plain" th:href="@{/item/list}">取消</a>
+            </div>
+            <p class="muted">提交后需要管理员审核，审核通过即上架展示。</p>
+        </form>
+    </div>
+
+</main>
+
+<footer class="site-footer"><div class="container">校园二手闲置交易平台</div></footer>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

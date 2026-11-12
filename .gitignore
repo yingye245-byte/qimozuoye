@@ -1,0 +1,32 @@
+# ---- Maven / Java ----
+target/
+*.class
+*.jar
+!.mvn/wrapper/*.jar
+*.war
+*.ear
+
+# ---- IDE ----
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+.DS_Store
+
+# ---- 运行数据 / 上传文件 ----
+/logs/
+/upload/
+/uploadfiles/
+
+# ---- 数据库/配置敏感信息 ----
+*.local.yml
+application-local.yml
+.env
+
+# ---- 系统/临时 ----
+Thumbs.db
+Desktop.ini
+*~
+*.swp
